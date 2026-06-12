@@ -10,8 +10,7 @@ https://stockvision.streamlit.app
 
 ## 📸 Dashboard Preview
 
-### 🖥️ StockVision UI / Dashboard
-![StockVision Dashboard](Screenshot%202026-06-12%20081611.png)
+![StockVision Dashboard](assets/Screenshot 2026-06-12 081611.png)
 
 ### 🧠 StockVision Logo
 ![StockVision Logo](assets/logo.png)
