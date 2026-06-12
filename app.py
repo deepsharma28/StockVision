@@ -84,7 +84,13 @@ df['Return'] = df['Close'].pct_change()
 
 df.dropna(inplace=True)
 
-latest = df.iloc[-1]
+import time
+
+for i in range(3):
+    df = yf.download(stock, period="2y", auto_adjust=True)
+    if not df.empty:
+        break
+    time.sleep(1)
 
 # ==========================
 # SAFE FUNCTION
