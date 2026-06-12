@@ -5,10 +5,16 @@ StockVision – AI Powered Stock Forecasting Dashboard
 StockVision is a machine learning-powered web application that predicts stock prices using historical market data. It provides interactive visualizations, technical indicators, and AI-based price forecasting using Streamlit.
 
 🚀 Live Demo
-
-(Add your deployed Streamlit link here if available)
 Example:
 https://stockvision.streamlit.app
+
+## 📸 Dashboard Preview
+
+### 🖥️ StockVision UI / Dashboard
+![StockVision Dashboard](Screenshot%202026-06-12%20081611.png)
+
+### 🧠 StockVision Logo
+![StockVision Logo](assets/logo.png)
 
 📊 Features
 🔮 AI-based stock price prediction (ML model)
