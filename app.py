@@ -5,11 +5,11 @@ import yfinance as yf
 import joblib
 import plotly.express as px
 import plotly.graph_objects as go
+import time
 
 # ==========================
 # Page Config
 # ==========================
-
 st.set_page_config(
     page_title="StockVision",
     page_icon="assets/logo.png",
@@ -19,7 +19,6 @@ st.set_page_config(
 # ==========================
 # LOGO + BRANDING
 # ==========================
-
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
@@ -34,7 +33,6 @@ st.divider()
 # ==========================
 # Sidebar
 # ==========================
-
 st.sidebar.title("Stock Selection")
 
 stock = st.sidebar.selectbox(
@@ -51,16 +49,24 @@ company_names = {
 # ==========================
 # Load Model
 # ==========================
-
 model = joblib.load(f"models/{stock}_model.pkl")
 
 # ==========================
-# Download Data (FIXED)
+# Download Data (SAFE)
 # ==========================
+df = None
 
-df = yf.download(stock, period="2y", auto_adjust=True)
+for i in range(3):
+    df = yf.download(stock, period="2y", auto_adjust=True)
+    if df is not None and not df.empty:
+        break
+    time.sleep(1)
 
-# 🔥 FIX: handle MultiIndex columns
+if df is None or df.empty:
+    st.error("Failed to fetch data from Yahoo Finance.")
+    st.stop()
+
+# Handle MultiIndex columns
 if isinstance(df.columns, pd.MultiIndex):
     df.columns = df.columns.get_level_values(0)
 
@@ -69,7 +75,6 @@ df.dropna(inplace=True)
 # ==========================
 # Feature Engineering
 # ==========================
-
 df['Lag_1'] = df['Close'].shift(1)
 df['Lag_2'] = df['Close'].shift(2)
 df['Lag_3'] = df['Close'].shift(3)
@@ -84,25 +89,20 @@ df['Return'] = df['Close'].pct_change()
 
 df.dropna(inplace=True)
 
-import time
-
-for i in range(3):
-    df = yf.download(stock, period="2y", auto_adjust=True)
-    if not df.empty:
-        break
-    time.sleep(1)
+# ==========================
+# Latest Row (FIXED)
+# ==========================
+latest = df.iloc[-1]
 
 # ==========================
-# SAFE FUNCTION
+# Safe float function
 # ==========================
-
 def safe_float(x):
     return float(np.array(x).squeeze())
 
 # ==========================
-# Features
+# Features for Prediction
 # ==========================
-
 feature_list = [
     latest['Lag_1'],
     latest['Lag_2'],
@@ -119,29 +119,25 @@ feature_list = [
 features = np.array(feature_list).reshape(1, -1)
 
 # ==========================
-# Prediction (SAFE)
+# Prediction
 # ==========================
-
 prediction = safe_float(model.predict(features)[0])
 
 # ==========================
-# Current Price (SAFE)
+# Current Price
 # ==========================
-
 current_price = safe_float(latest['Close'])
 
 change = prediction - current_price
 
 # ==========================
-# HEADER
+# Header
 # ==========================
-
 st.subheader(f"AI Forecasting for {company_names[stock]}")
 
 # ==========================
-# KPI CARDS
+# KPI Cards
 # ==========================
-
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -156,18 +152,16 @@ with col3:
 st.divider()
 
 # ==========================
-# PRICE CHART
+# Price Chart
 # ==========================
-
 st.subheader("Closing Price Trend")
 
 fig = px.line(df, x=df.index, y="Close")
 st.plotly_chart(fig, use_container_width=True)
 
 # ==========================
-# MOVING AVERAGES
+# Moving Averages
 # ==========================
-
 st.subheader("Moving Averages")
 
 fig_ma = go.Figure()
@@ -178,25 +172,22 @@ fig_ma.add_trace(go.Scatter(x=df.index, y=df['MA_20'], name="MA 20"))
 st.plotly_chart(fig_ma, use_container_width=True)
 
 # ==========================
-# VOLUME
+# Volume
 # ==========================
-
 st.subheader("Volume")
 
 fig_vol = px.bar(df, x=df.index, y="Volume")
 st.plotly_chart(fig_vol, use_container_width=True)
 
 # ==========================
-# LATEST DATA
+# Latest Data
 # ==========================
-
 st.subheader("Latest Data")
 st.dataframe(df.tail(10), use_container_width=True)
 
 # ==========================
-# MODEL METRICS
+# Model Metrics
 # ==========================
-
 st.subheader("Model Performance")
 
 metrics = pd.read_csv("metrics/metrics.csv")
@@ -205,11 +196,9 @@ metrics = metrics[metrics["Stock"] == stock]
 st.dataframe(metrics, use_container_width=True)
 
 # ==========================
-# FEATURE IMPORTANCE
+# Feature Importance
 # ==========================
-
 if hasattr(model, "feature_importances_"):
-
     st.subheader("Feature Importance")
 
     feature_names = [
@@ -233,8 +222,7 @@ if hasattr(model, "feature_importances_"):
     st.plotly_chart(fig_imp, use_container_width=True)
 
 # ==========================
-# FOOTER
+# Footer
 # ==========================
-
 st.divider()
 st.caption("Built with Machine Learning + Streamlit + Yahoo Finance")
