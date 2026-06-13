@@ -4,7 +4,7 @@ StockVision is a machine learning-powered stock analysis and forecasting web app
 
 🚀 Live Demo
 
-👉 https://stockvision.streamlit.app (replace with your deployed link)
+(https://stockvision-3s3crosfjz2xdbhhpqwakx.streamlit.app/)
 
 📸 Project Preview
 🖥️ Dashboard UI
